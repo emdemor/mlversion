@@ -1,4 +1,4 @@
-basix
+basix>=0.0.13
 click==8.1.3
 loguru
 sphinx==6.1.1
