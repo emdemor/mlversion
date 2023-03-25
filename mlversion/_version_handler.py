@@ -4,10 +4,13 @@ from typing import List, Optional, Union
 
 from loguru import logger
 from basix import files
-import packaging
+from packaging import version as vs
 
-class ModelVersion(packaging.version.Version):
-    pass
+class ModelVersion(vs.Version):
+
+    def __init__(self, version_str: str):
+        self.version_str = version_str
+        super().__init__(self.version_str)
 
 class VersionHandler:
     """
@@ -75,7 +78,7 @@ class VersionHandler:
         match = self._version_pattern_regex.search(version_string)
 
         if not match:
-            raise packaging.version.InvalidVersion(f"'{version_string}' is not a valid version format.")
+            raise vs.InvalidVersion(f"'{version_string}' is not a valid version format.")
 
         self._create_version_directory(version_string)
 
@@ -127,7 +130,7 @@ class VersionHandler:
                         self.latest_version, version
                     ):
                         self.latest_version = version
-                except packaging.version.InvalidVersion as exception:
+                except vs.InvalidVersion as exception:
                     pass
 
     def _update(self) -> None:
