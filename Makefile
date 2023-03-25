@@ -47,7 +47,8 @@ env-clear:
 	conda env remove -n mlversion
 
 unit-test:
-	if [ ! -d $(WORKDIR_PATH) ]; then mkdir -p $(WORKDIR_PATH); fi
-	if [ ! -d $(WORKDIR_MODELS_PATH) ]; then mkdir -p $(WORKDIR_MODELS_PATH); fi
+	if [ ! -d $(WORKDIR_PATH) ]; then rm -rf $(WORKDIR_PATH); fi
+	mkdir -p $(WORKDIR_PATH);
+	mkdir -p $(WORKDIR_MODELS_PATH);
 	pytest $(TESTS_PATH) -vvv  --cov=$(PROJECT_NAME) --cov-report=html --cov-report=term -s
-#rm -rf $(WORKDIR_PATH)
+	rm -rf $(WORKDIR_PATH)
