@@ -123,15 +123,14 @@ class VersionHandler:
             match = self._version_dir_pattern_regex.search(subdir)
             if match:
                 version_str = match.group(1)
-                try:
-                    version = ModelVersion(version_str)
-                    self.history.append(version)
-                    if self._check_if_new_version_is_greater(
-                        self.latest_version, version
-                    ):
-                        self.latest_version = version
-                except vs.InvalidVersion as exception:
-                    pass
+                version = ModelVersion(version_str)
+                self.history.append(version)
+                if self._check_if_new_version_is_greater(
+                    self.latest_version, version
+                ):
+                    self.latest_version = version
+            else:
+                raise vs.InvalidVersion(f"'{subdir} is not a valid version.")
 
     def _update(self) -> None:
         """
