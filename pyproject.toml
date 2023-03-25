@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mlversion"
+description = "MLVersion is a Python package that simplifies version management for machine learning models."
+readme = "README.md"
+authors = [
+    { name = "Eduardo Messias de Morais", email = "emdemor415@gmail.com" }
+]
+license = { file = "LICENSE" }
+classifiers = [
+    "Environment :: Console",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: Portuguese (Brazilian)",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Utilities",
+]
+keywords = ["template", "app"]
+requires-python = ">=3.9"
+dynamic = ["dependencies", "version"]
+
+[tool.setuptools]
+packages = ["mlversion"]
+
+[tool.setuptools.dynamic]
+version = {attr = "mlversion.__version__"}
+dependencies = {file = ["requirements.txt"]}
