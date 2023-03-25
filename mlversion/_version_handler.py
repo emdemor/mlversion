@@ -4,8 +4,10 @@ from typing import List, Optional, Union
 
 from loguru import logger
 from basix import files
-from packaging.version import Version, InvalidVersion
+import packaging
 
+class ModelVersion(packaging.version.Version):
+    pass
 
 class VersionHandler:
     """
@@ -73,7 +75,7 @@ class VersionHandler:
         match = self._version_pattern_regex.search(version_string)
 
         if not match:
-            raise InvalidVersion(f"'{version_string}' is not a valid version format.")
+            raise packaging.version.InvalidVersion(f"'{version_string}' is not a valid version format.")
 
         self._create_version_directory(version_string)
 
@@ -110,7 +112,7 @@ class VersionHandler:
 
         self.history = []
 
-        latest_version = Version("0.0.0")
+        latest_version = ModelVersion("0.0.0")
 
         files.make_directory(self.path)
         
@@ -119,13 +121,13 @@ class VersionHandler:
             if match:
                 version_str = match.group(1)
                 try:
-                    version = Version(version_str)
+                    version = ModelVersion(version_str)
                     self.history.append(version)
                     if self._check_if_new_version_is_greater(
                         self.latest_version, version
                     ):
                         self.latest_version = version
-                except InvalidVersion as exception:
+                except packaging.version.InvalidVersion as exception:
                     pass
 
     def _update(self) -> None:
@@ -136,7 +138,7 @@ class VersionHandler:
 
     @staticmethod
     def _check_if_new_version_is_greater(
-        old_version: Optional[Version], new_version: Optional[Version]
+        old_version: Optional[ModelVersion], new_version: Optional[ModelVersion]
     ) -> bool:
         """
         Check if the new version is greater than the old version.
