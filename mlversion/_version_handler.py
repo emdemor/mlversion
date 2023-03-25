@@ -112,6 +112,8 @@ class VersionHandler:
 
         latest_version = Version("0.0.0")
 
+        files.make_directory(self.path)
+        
         for subdir in os.listdir(self.path):
             match = self._version_dir_pattern_regex.search(subdir)
             if match:
