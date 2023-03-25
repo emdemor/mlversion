@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Welcome to Template de MLVersion's documentation!
-==============================================
+=====================================================
 
 .. toctree::
    :maxdepth: 2
