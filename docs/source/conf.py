@@ -15,7 +15,7 @@ project = 'MLVersion' # Change app_name
 copyright = '2023, Eduardo Messias de Morais'
 author = 'Eduardo Messias de Morais'
 release = '2023'
-version = "0.0.1.dev0"
+version = "0.0.1.dev1"
 
 
 # -- General configuration ---------------------------------------------------
