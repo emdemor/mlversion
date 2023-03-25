@@ -43,6 +43,16 @@ class VersionHandler:
         self.latest_version: Union[None, str] = None
         self._update()
 
+
+    def init(self) -> None:
+        """
+        Start model versioning
+        """
+
+        self.add_new_version("0.0.0dev0")
+
+        self._update()
+
     def add_new_version(self, version_string: str) -> None:
         """
         Add a new version to the directory.
