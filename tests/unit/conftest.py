@@ -1,4 +1,8 @@
+import shutil
+
 import pytest
+from basix import files
+
 from mlversion import ModelVersion, VersionHandler
 
 
@@ -6,9 +10,12 @@ from mlversion import ModelVersion, VersionHandler
 def start_version_string():
     return "0.0.0"
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def models_path():
-    return "workdir/models"
+    directory = "workdir/models"
+    files.make_directory(directory)
+    yield directory
+    shutil.rmtree(directory, ignore_errors=True)
 
 @pytest.fixture()
 def model_version(start_version_string):
