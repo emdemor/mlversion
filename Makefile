@@ -1,3 +1,8 @@
+TESTS_PATH := $(PWD)/tests
+WORKDIR_PATH := $(PWD)/workdir
+WORKDIR_MODELS_PATH := $(WORKDIR_PATH)/models
+PROJECT_NAME := mlversion
+
 build:
 	bumpversion build
 	pip install build
@@ -40,3 +45,9 @@ env-create:
 
 env-clear:
 	conda env remove -n mlversion
+
+unit-test:
+	if [ ! -d $(WORKDIR_PATH) ]; then mkdir -p $(WORKDIR_PATH); fi
+	if [ ! -d $(WORKDIR_MODELS_PATH) ]; then mkdir -p $(WORKDIR_MODELS_PATH); fi
+	pytest $(TESTS_PATH) -vvv  --cov=$(PROJECT_NAME) --cov-report=html --cov-report=term -s
+#rm -rf $(WORKDIR_PATH)
