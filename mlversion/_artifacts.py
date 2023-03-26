@@ -50,9 +50,11 @@ class CSVArtifact(Artifact):
         self.content.to_csv(self.path, index=False)
         return self
 
-    def load(self, path: Optional[str] = None):
-        if path is None:
-            path = self.path
+    @classmethod
+    def load(cls, label: str, parent_dir: str):
+        path = os.path.join(parent_dir, label)
+        if not os.path.exists(path):
+            raise FileNotFoundError(f"The csv file '{path}' do not exists.")
         return pd.read_csv(path)
 
 
