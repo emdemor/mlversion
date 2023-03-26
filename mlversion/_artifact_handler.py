@@ -1,4 +1,5 @@
-from typing import List
+import os
+from typing import List, Optional
 
 from pydantic import Field
 from pydantic.dataclasses import dataclass
@@ -10,10 +11,44 @@ from mlversion._artifacts import Artifact
 @dataclass
 class ArtifactSubGroup:
     label: str
+    parent_dir: str
+    path: Optional[str] = None
     artifacts: List[Artifact] = Field(default_factory=list)
 
     class Config:
         arbitrary_types_allowed = True
+
+    def __post_init__(self):
+        self._set_path(self.parent_dir, self.label)
+        self._update()
+
+    def _set_path(self, parent_dir, label):
+        self.path = os.path.join(parent_dir, label)
+
+    def _update(self):
+        for elem in self.artifacts:
+            self.remove(elem.label)
+            setattr(self, elem.label, elem)
+
+    def add(self, artifact: Artifact, overwrite=False):
+        if isinstance(artifact, ArtifactSubGroup):
+            if hasattr(self, artifact.label) and not overwrite:
+                raise ExistingAttributeError(self, artifact.label)
+            self.artifacts.append(ArtifactSubGroup)
+            self._update()
+        else:
+            raise TypeError(
+                "To use the method 'add' of and object of the class "
+                f"{self.__class__}, you must pass an 'ArtifactSubGroup' object."
+                )
+
+    def remove(self, label: str):
+        if hasattr(self, label):
+            delattr(self, label)
+
+    @classmethod
+    def load(cls):
+        pass
 
 
 @dataclass
@@ -58,3 +93,12 @@ class ArtifactHandler:
                 ArtifactSubGroup(label="predicted"),
             ],
         )
+
+class ExistingAttributeError(Exception):
+    def __init__(self, object, attribute_name):
+        message = (
+            f"Attribute {attribute_name} already exists in object "
+            f"of the class {object.__class__}."
+        )
+        super().__init__(message)
+
