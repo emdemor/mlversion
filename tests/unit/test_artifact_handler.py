@@ -1,6 +1,7 @@
 from loguru import logger
 import pandas as pd
-from mlversion._artifact_handler import CSVArtifact, ArtifactGroup, ArtifactSubGroup
+from mlversion._artifact_handler import ArtifactGroup, ArtifactSubGroup
+from mlversion._artifacts import CSVArtifact
 
 def test_artifact():
     df = pd.DataFrame([[0,10],[1,12]], columns=["id", "value"])
