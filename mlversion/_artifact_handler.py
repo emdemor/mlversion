@@ -29,7 +29,7 @@ class ArtifactSubGroup:
     def _update(self):
         if not isinstance(self.artifacts, FieldInfo):
             for elem in self.artifacts:
-                self.remove_artifact(elem.label)
+                self._remove_artifact_attribute(elem.label)
                 setattr(self, elem.label, elem)
 
     def _add_artifact(self, artifact):
@@ -49,7 +49,7 @@ class ArtifactSubGroup:
             type = artifact.type
 
         if artifact_passed and (label_passed or content_passed or type_passed):
-            raise IncompatibleArgumentsError("If you pass and artifact, you cannot pass " "label nether the content")
+            raise IncompatibleArgumentsError("If you pass and artifact, you cannot pass label and content")
 
         ArtifactClass = ARTIFACT_TYPES[type]
 
@@ -81,8 +81,18 @@ class ArtifactSubGroup:
         return self
 
     def remove_artifact(self, label: str):
+        self._remove_artifact_attribute(label)
+        self._remove_artifact_from_list(label)
+
+
+    def _remove_artifact_attribute(self, label: str) -> None:
         if hasattr(self, label):
             delattr(self, label)
+
+
+    def _remove_artifact_from_list(self, label: str) -> None:
+        self.artifacts = [elem for elem in self.artifacts if elem.label != label]
+
 
     def save(self):
         if not isinstance(self.artifacts, FieldInfo):
@@ -105,24 +115,38 @@ class ArtifactSubGroup:
 @dataclass
 class ArtifactGroup:
     label: str
+    parent_dir: str
+    path: Optional[str] = None
     artifacts_subgroups: List[ArtifactSubGroup] = Field(default_factory=list)
 
     class Config:
         arbitrary_types_allowed = True
 
     def __post_init__(self):
+        self._set_path(self.parent_dir, self.label)
         self._update()
 
-    def _update(self):
-        for elem in self.artifacts_subgroups:
-            setattr(self, elem.label, elem)
+    def _set_path(self, parent_dir, label):
+        self.path = os.path.join(parent_dir, label)
 
-    def add(self, artifact: ArtifactSubGroup):
-        if isinstance(artifact, ArtifactSubGroup):
-            self.artifacts_subgroups.append(ArtifactSubGroup)
-            self._update()
-        else:
-            raise TypeError("You must pass an 'ArtifactSubGroup' object.")
+    def _update(self):
+        if not isinstance(self.artifacts_subgroups, FieldInfo):
+            for elem in self.artifacts_subgroups:
+                self.remove_artifact_subgroup(elem.label)
+                setattr(self, elem.label, elem)
+
+    def remove_artifact_subgroup(self, label: str) -> None:
+        self._remove_artifact_subgroup_attribute(label)
+        self._remove_artifact_subgroup_from_list(label)
+
+
+    def _remove_artifact_subgroup_attribute(self, label: str) -> None:
+        if hasattr(self, label):
+            delattr(self, label)
+
+
+    def _remove_artifact_subgroup_from_list(self, label: str) -> None:
+        self.artifacts_subgroups = [elem for elem in self.artifacts_subgroups if elem.label != label]
 
 
 class ArtifactHandler:
