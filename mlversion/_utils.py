@@ -1,3 +1,8 @@
+import os
+from pathlib import Path
+from typing import Any, List, Union
+
+import joblib
 from loguru import logger
 import pandas as pd
 from tabulate import tabulate
@@ -10,3 +15,21 @@ def _get_dataframe_representation(df):
         df_break.index = index
 
     return tabulate(df_break, headers='keys', tablefmt='psql')
+
+
+def save_bin(obj: Any, path: str) -> None:
+    create_folder_chain(path)
+    joblib.dump(obj, path)
+
+
+def load_bin(path: str) -> Any:
+    return joblib.load(path)
+
+
+def create_folder_chain(path: Union[str, Path]) -> None:
+    path_obj = Path(path)
+    if path_obj.is_dir():
+        os.makedirs(path_obj, exist_ok=True)
+    else:
+        parent_dir = path_obj.parent
+        os.makedirs(parent_dir, exist_ok=True)
