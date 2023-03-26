@@ -1,10 +1,11 @@
-from abc import ABC, abstractmethod
+from __future__ import annotations
 import os
+from abc import ABC, abstractmethod
 from typing import Any, Optional
-import pandas as pd
 
-from pydantic.dataclasses import dataclass
+import pandas as pd
 from basix import files
+from pydantic.dataclasses import dataclass
 
 from mlversion._utils import _get_dataframe_representation, save_bin, load_bin
 
@@ -24,7 +25,7 @@ class Artifact(ABC):
         self.path = os.path.join(parent_dir, label+".csv")
 
     @abstractmethod
-    def save(self):
+    def save(self) -> Artifact:
         pass
 
     @abstractmethod
@@ -46,9 +47,10 @@ class CSVArtifact(Artifact):
     def _set_path(self, parent_dir, label):
         self.path = os.path.join(parent_dir, label+".csv")
     
-    def save(self):
+    def save(self) -> CSVArtifact:
         files.make_directory(self.parent_dir)
         self.content.to_csv(self.path, index=False)
+        return self
 
     def load(self, path: Optional[str]=None):
         if path is None:
@@ -61,9 +63,10 @@ class BinaryArtifact(Artifact):
     def __init__(self, label: str, content: Any, parent_dir: str):
         super().__init__(label=label, content=content, type=self.type, parent_dir=parent_dir, path=self.path)
     
-    def save(self):
+    def save(self) -> BinaryArtifact:
         files.make_directory(self.parent_dir)
         save_bin(self.content, self.path)
+        return self
 
     def load(self, path: Optional[str]=None):
         if path is None:
