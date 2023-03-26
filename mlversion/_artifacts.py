@@ -24,6 +24,9 @@ class Artifact(ABC):
     def _set_path(self, parent_dir, label):
         self.path = os.path.join(parent_dir, label)
 
+    def get(self):
+        return self.content
+
     @abstractmethod
     def save(self) -> Artifact:
         pass
@@ -55,7 +58,8 @@ class CSVArtifact(Artifact):
         path = os.path.join(parent_dir, label)
         if not os.path.exists(path):
             raise FileNotFoundError(f"The csv file '{path}' do not exists.")
-        return pd.read_csv(path)
+        content = pd.read_csv(path)
+        return cls(label=label, content=content, parent_dir=parent_dir)
 
 
 class BinaryArtifact(Artifact):
