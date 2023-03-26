@@ -28,5 +28,5 @@ dynamic = ["dependencies", "version"]
 packages = ["mlversion"]
 
 [tool.setuptools.dynamic]
-version = {attr = "mlversion.__version__"}
+version = {attr = "mlversion._version.__version__"}
 dependencies = {file = ["requirements.txt"]}
