@@ -30,3 +30,6 @@ packages = ["mlversion"]
 [tool.setuptools.dynamic]
 version = {attr = "mlversion._version.__version__"}
 dependencies = {file = ["requirements.txt"]}
+
+[tool.black]
+line-length = 120

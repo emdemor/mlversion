@@ -1,9 +1,7 @@
 import os
 import shutil
-from typing import Literal
 
 import pytest
-from loguru import logger
 from packaging import version as vs
 from basix import files
 
@@ -32,7 +30,7 @@ def test_version_handler_add_new_version(version_handler: VersionHandler, models
 def test_version_handler_add_invalid_new_version(version_handler: VersionHandler, models_path: str):
     invalid_version = "0.0.1.beta1"
 
-    with pytest.raises(vs.InvalidVersion) as exception:  
+    with pytest.raises(vs.InvalidVersion):
         version_handler.add_new_version(invalid_version)
 
 
@@ -40,17 +38,17 @@ def test_version_handler_add_duplicated_new_version(version_handler: VersionHand
     new_version = "0.0.2"
     version_handler.add_new_version(new_version)
 
-    with pytest.raises(ExistingVersionError) as exception:  
+    with pytest.raises(ExistingVersionError):
         version_handler.add_new_version(new_version)
 
 
 def test_version_handler_get_versions_invalid(version_handler: VersionHandler, models_path: str):
     invalid_version = "0.0.1.beta2"
     files.make_directory(os.path.join(models_path, f"version={invalid_version}"))
-    with pytest.raises(vs.InvalidVersion) as exception:  
+    with pytest.raises(vs.InvalidVersion):
         version_handler._get_versions()
     shutil.rmtree(os.path.join(models_path, f"version={invalid_version}"))
-    
+
 
 def test_check_if_new_version_is_greater(version_handler: VersionHandler):
     assert version_handler._check_if_new_version_is_greater("0.0.1", "0.0.2")
@@ -72,5 +70,5 @@ def test_check_if_new_version_is_greater(version_handler: VersionHandler):
     assert not version_handler._check_if_new_version_is_greater("1.0.0", "1.0.0")
     assert version_handler._check_if_new_version_is_greater(None, "1.0.0")
     assert not version_handler._check_if_new_version_is_greater("1.0.0", None)
-    with pytest.raises(TypeError) as exception:
+    with pytest.raises(TypeError):
         version_handler._check_if_new_version_is_greater(None, None)
