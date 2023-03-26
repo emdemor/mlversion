@@ -54,3 +54,6 @@ unit-test:
 	mkdir -p $(WORKDIR_DATA_PATH);
 	pytest $(TESTS_PATH) -vvv  --cov=$(PROJECT_NAME) --cov-report=html --cov-report=term -s
 	rm -rf $(WORKDIR_PATH)
+
+flake:
+	flake8 mlversion

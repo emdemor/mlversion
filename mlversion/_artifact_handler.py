@@ -7,12 +7,11 @@ from mlversion import VersionHandler
 from mlversion._artifacts import Artifact
 
 
-
-
 @dataclass
 class ArtifactSubGroup:
     label: str
     artifacts: List[Artifact] = Field(default_factory=list)
+
     class Config:
         arbitrary_types_allowed = True
 
@@ -31,7 +30,7 @@ class ArtifactGroup:
     def _update(self):
         for elem in self.artifacts_subgroups:
             setattr(self, elem.label, elem)
-    
+
     def add(self, artifact: ArtifactSubGroup):
         if isinstance(artifact, ArtifactSubGroup):
             self.artifacts_subgroups.append(ArtifactSubGroup)
@@ -51,11 +50,11 @@ class ArtifactHandler:
 
     def _set_data(self):
         return ArtifactGroup(
-            label = "data",
-            artifacts_subgroups = [
+            label="data",
+            artifacts_subgroups=[
                 ArtifactSubGroup(label="raw"),
                 ArtifactSubGroup(label="interim"),
                 ArtifactSubGroup(label="transformed"),
                 ArtifactSubGroup(label="predicted"),
-            ]
+            ],
         )

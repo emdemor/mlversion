@@ -1,11 +1,11 @@
 import os
 from pathlib import Path
-from typing import Any, List, Union
+from typing import Any,  Union
 
 import joblib
-from loguru import logger
 import pandas as pd
 from tabulate import tabulate
+
 
 def _get_dataframe_representation(df):
     df_break = df.head(5)

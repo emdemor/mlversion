@@ -2,15 +2,15 @@ import os
 import re
 from typing import List, Optional, Union
 
-from loguru import logger
 from basix import files
 from packaging import version as vs
 
-class ModelVersion(vs.Version):
 
+class ModelVersion(vs.Version):
     def __init__(self, version_str: str):
         self.version_str = version_str
         super().__init__(self.version_str)
+
 
 class VersionHandler:
     """
@@ -29,6 +29,7 @@ class VersionHandler:
     add_new_version(version_string: str) -> None:
         Add a new version to the directory.
     """
+
     _version_pattern = r"(\d+\.\d+\.\d+(dev|rc)?\d*)(\w*)$"
     _version_pattern_regex = re.compile(_version_pattern)
     _version_dir_pattern_regex = re.compile(r"version=" + _version_pattern)
@@ -47,7 +48,6 @@ class VersionHandler:
         self.versions: Union[None, List[str]] = None
         self.latest_version: Union[None, str] = None
         self._update()
-
 
     def init(self) -> None:
         """
@@ -101,8 +101,7 @@ class VersionHandler:
 
         if version_string in [version.base_version for version in self.history]:
             raise ExistingVersionError(
-                f"Unable to add version {version_string} because it "
-                "already exists in the folder {self.path}."
+                f"Unable to add version {version_string} because it " "already exists in the folder {self.path}."
             )
 
         files.make_directory(os.path.join(self.path, f"version={version_string}"))
@@ -115,19 +114,15 @@ class VersionHandler:
 
         self.history = []
 
-        latest_version = ModelVersion("0.0.0")
-
         files.make_directory(self.path)
-        
+
         for subdir in os.listdir(self.path):
             match = self._version_dir_pattern_regex.search(subdir)
             if match:
                 version_str = match.group(1)
                 version = ModelVersion(version_str)
                 self.history.append(version)
-                if self._check_if_new_version_is_greater(
-                    self.latest_version, version
-                ):
+                if self._check_if_new_version_is_greater(self.latest_version, version):
                     self.latest_version = version
             else:
                 raise vs.InvalidVersion(f"'{subdir} is not a valid version.")
@@ -163,9 +158,7 @@ class VersionHandler:
             If both versions are None.
         """
         if (old_version is None) and (new_version is None):
-            raise TypeError(
-                f"It is not possible to compare versions since both are None."
-            )
+            raise TypeError("It is not possible to compare versions since both are None.")
 
         if (old_version is None) and (new_version is not None):
             return True
