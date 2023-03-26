@@ -62,7 +62,7 @@ class ArtifactSubGroup:
     def create_artifact(self, label, content, type, overwrite=False):
         if hasattr(self, label) and not overwrite:
             raise ExistingAttributeError(self, label)
-        artifact = self._set_artifact_to_be_added(label=label, content=content)
+        artifact = self._set_artifact_to_be_added(label=label, content=content, type=type)
         self._add_artifact(artifact)
         return self
 
@@ -100,19 +100,6 @@ class ArtifactSubGroup:
             artifact = load_artifact(artifact_path)
             subgroup.add_artifact(artifact)
         return subgroup
-
-    #         artifact_parent_dir = os.path.join(parent_dir, label)
-    #         artifact = Artifact.load(artifact_parent_dir)
-
-    #         match = self._version_dir_pattern_regex.search(subdir)
-    #         if match:
-    #             version_str = match.group(1)
-    #             version = ModelVersion(version_str)
-    #             self.history.append(version)
-    #             if self._check_if_new_version_is_greater(self.latest_version, version):
-    #                 self.latest_version = version
-    #         else:
-    #             raise vs.InvalidVersion(f"'{subdir} is not a valid version.")
 
 
 @dataclass
