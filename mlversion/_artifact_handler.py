@@ -1,7 +1,9 @@
 import os
 from typing import List, Optional
+from loguru import logger
 
 from pydantic import Field
+from pydantic.fields import FieldInfo
 from pydantic.dataclasses import dataclass
 
 from mlversion import VersionHandler
@@ -26,30 +28,47 @@ class ArtifactSubGroup:
         self.path = os.path.join(parent_dir, label)
 
     def _update(self):
-        for elem in self.artifacts:
-            self.remove(elem.label)
-            setattr(self, elem.label, elem)
+        if not isinstance(self.artifacts,FieldInfo):
+            for elem in self.artifacts:
+                self.remove(elem.label)
+                setattr(self, elem.label, elem)
 
     def add(self, artifact: Artifact, overwrite=False):
-        if isinstance(artifact, ArtifactSubGroup):
+        if isinstance(artifact, Artifact):
             if hasattr(self, artifact.label) and not overwrite:
                 raise ExistingAttributeError(self, artifact.label)
-            self.artifacts.append(ArtifactSubGroup)
+            self.artifacts.append(artifact)
             self._update()
         else:
             raise TypeError(
                 "To use the method 'add' of and object of the class "
-                f"{self.__class__}, you must pass an 'ArtifactSubGroup' object."
-                )
+                f"{self.__class__.__name__}, you must pass an 'Artifact' object."
+            )
+        return self
 
     def remove(self, label: str):
         if hasattr(self, label):
             delattr(self, label)
 
-    @classmethod
-    def load(cls):
+    def save(self):
         pass
 
+
+    # @classmethod
+    # def load(cls, label: str, parent_dir: str):
+    #     for label in os.listdir(parent_dir):
+    #         artifact_parent_dir = os.path.join(parent_dir, label)
+    #         artifact = Artifact.load(artifact_parent_dir)
+
+    #         match = self._version_dir_pattern_regex.search(subdir)
+    #         if match:
+    #             version_str = match.group(1)
+    #             version = ModelVersion(version_str)
+    #             self.history.append(version)
+    #             if self._check_if_new_version_is_greater(self.latest_version, version):
+    #                 self.latest_version = version
+    #         else:
+    #             raise vs.InvalidVersion(f"'{subdir} is not a valid version.")
 
 @dataclass
 class ArtifactGroup:
@@ -101,4 +120,3 @@ class ExistingAttributeError(Exception):
             f"of the class {object.__class__}."
         )
         super().__init__(message)
-
