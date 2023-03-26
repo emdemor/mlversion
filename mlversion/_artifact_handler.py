@@ -114,7 +114,7 @@ class ArtifactGroup:
     label: str
     parent_dir: str
     path: Optional[str] = None
-    artifacts_subgroups: List[ArtifactSubGroup] = Field(default_factory=list)
+    subgroups: List[ArtifactSubGroup] = Field(default_factory=list)
 
     def __post_init__(self):
         self._set_path(self.parent_dir, self.label)
@@ -123,25 +123,31 @@ class ArtifactGroup:
     class Config:
         arbitrary_types_allowed = True
 
-    def remove_artifact_subgroup(self, label: str) -> None:
-        self._remove_artifact_subgroup_attribute(label)
-        self._remove_artifact_subgroup_from_list(label)
+    def add_subgroup():
+        pass
+
+    def create_subgroup():
+        pass
+
+    def remove_subgroup(self, label: str) -> None:
+        self._remove_subgroup_attribute(label)
+        self._remove_subgroup_from_list(label)
 
     def _set_path(self, parent_dir, label):
         self.path = os.path.join(parent_dir, label)
 
     def _update(self):
-        if not isinstance(self.artifacts_subgroups, FieldInfo):
-            for elem in self.artifacts_subgroups:
-                self.remove_artifact_subgroup(elem.label)
+        if not isinstance(self.subgroups, FieldInfo):
+            for elem in self.subgroups:
+                self._remove_subgroup_attribute(elem.label)
                 setattr(self, elem.label, elem)
 
-    def _remove_artifact_subgroup_attribute(self, label: str) -> None:
+    def _remove_subgroup_attribute(self, label: str) -> None:
         if hasattr(self, label):
             delattr(self, label)
 
-    def _remove_artifact_subgroup_from_list(self, label: str) -> None:
-        self.artifacts_subgroups = [elem for elem in self.artifacts_subgroups if elem.label != label]
+    def _remove_subgroup_from_list(self, label: str) -> None:
+        self.subgroups = [elem for elem in self.subgroups if elem.label != label]
 
 
 class ArtifactHandler:
@@ -156,7 +162,7 @@ class ArtifactHandler:
     def _set_data(self):
         return ArtifactGroup(
             label="data",
-            artifacts_subgroups=[
+            subgroups=[
                 ArtifactSubGroup(label="raw"),
                 ArtifactSubGroup(label="interim"),
                 ArtifactSubGroup(label="transformed"),
