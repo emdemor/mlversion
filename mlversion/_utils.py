@@ -7,7 +7,7 @@ import pandas as pd
 from tabulate import tabulate
 
 
-def _get_dataframe_representation(df):
+def get_dataframe_representation(df):
     df_break = df.head(5)
     if len(df) > 5:
         index = list(df_break.index) + ["..."]
