@@ -49,3 +49,21 @@ def test_create_artifact_in_subgroup(artifact_subgroup):
     artifact_subgroup_imported = ArtifactSubGroup.load(label="artifact_subgroup", parent_dir="workdir/test/")
 
     assert hasattr(artifact_subgroup_imported, "new_artifact")
+
+
+def test_remove_artifact_in_subgroup(artifact_subgroup):
+
+    has_train_start = hasattr(artifact_subgroup, "train")
+
+    assert has_train_start
+    assert any([a.label == "train" for a in artifact_subgroup.artifacts])
+
+    artifact_subgroup.remove_artifact(label = "train")
+
+    has_train_end = hasattr(artifact_subgroup, "train")
+
+    assert not has_train_end
+    assert all([a.label != "train" for a in artifact_subgroup.artifacts])
+
+def test_artifact_group():
+    pass
