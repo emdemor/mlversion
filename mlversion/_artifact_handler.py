@@ -16,12 +16,54 @@ class ArtifactSubGroup:
     path: Optional[str] = None
     artifacts: List[Artifact] = Field(default_factory=list)
 
-    class Config:
-        arbitrary_types_allowed = True
-
     def __post_init__(self):
         self._set_path(self.parent_dir, self.label)
         self._update()
+
+    class Config:
+        arbitrary_types_allowed = True
+
+    def save(self):
+        if not isinstance(self.artifacts, FieldInfo):
+            for artifact in self.artifacts:
+                artifact.save()
+
+        return self
+
+    @classmethod
+    def load(cls, label: str, parent_dir: str):
+        subgroup = ArtifactSubGroup(label=label, parent_dir=parent_dir)
+        path = os.path.join(parent_dir, label)
+        for label in os.listdir(path):
+            artifact_path = os.path.join(path, label)
+            artifact = load_artifact(artifact_path)
+            subgroup.add_artifact(artifact)
+        return subgroup
+
+    def create_artifact(self, label, content, type, overwrite=False):
+        if hasattr(self, label) and not overwrite:
+            raise ExistingAttributeError(self, label)
+        artifact = self._set_artifact_to_be_added(label=label, content=content, type=type)
+        self._add_artifact(artifact)
+        return self
+
+    def add_artifact(self, artifact: Artifact, overwrite=False):
+        if isinstance(artifact, Artifact):
+            if hasattr(self, artifact.label) and not overwrite:
+                raise ExistingAttributeError(self, artifact.label)
+            artifact = self._set_artifact_to_be_added(artifact=artifact)
+            self._add_artifact(artifact)
+
+        else:
+            raise TypeError(
+                "To use the method 'add' of and object of the class "
+                f"{self.__class__.__name__}, you must pass an 'Artifact' object."
+            )
+        return self
+
+    def remove_artifact(self, label: str):
+        self._remove_artifact_attribute(label)
+        self._remove_artifact_from_list(label)
 
     def _set_path(self, parent_dir, label):
         self.path = os.path.join(parent_dir, label)
@@ -59,57 +101,12 @@ class ArtifactSubGroup:
             parent_dir=new_parent_dir,
         )
 
-    def create_artifact(self, label, content, type, overwrite=False):
-        if hasattr(self, label) and not overwrite:
-            raise ExistingAttributeError(self, label)
-        artifact = self._set_artifact_to_be_added(label=label, content=content, type=type)
-        self._add_artifact(artifact)
-        return self
-
-    def add_artifact(self, artifact: Artifact, overwrite=False):
-        if isinstance(artifact, Artifact):
-            if hasattr(self, artifact.label) and not overwrite:
-                raise ExistingAttributeError(self, artifact.label)
-            artifact = self._set_artifact_to_be_added(artifact=artifact)
-            self._add_artifact(artifact)
-
-        else:
-            raise TypeError(
-                "To use the method 'add' of and object of the class "
-                f"{self.__class__.__name__}, you must pass an 'Artifact' object."
-            )
-        return self
-
-    def remove_artifact(self, label: str):
-        self._remove_artifact_attribute(label)
-        self._remove_artifact_from_list(label)
-
-
     def _remove_artifact_attribute(self, label: str) -> None:
         if hasattr(self, label):
             delattr(self, label)
 
-
     def _remove_artifact_from_list(self, label: str) -> None:
         self.artifacts = [elem for elem in self.artifacts if elem.label != label]
-
-
-    def save(self):
-        if not isinstance(self.artifacts, FieldInfo):
-            for artifact in self.artifacts:
-                artifact.save()
-
-        return self
-
-    @classmethod
-    def load(cls, label: str, parent_dir: str):
-        subgroup = ArtifactSubGroup(label=label, parent_dir=parent_dir)
-        path = os.path.join(parent_dir, label)
-        for label in os.listdir(path):
-            artifact_path = os.path.join(path, label)
-            artifact = load_artifact(artifact_path)
-            subgroup.add_artifact(artifact)
-        return subgroup
 
 
 @dataclass
@@ -119,12 +116,16 @@ class ArtifactGroup:
     path: Optional[str] = None
     artifacts_subgroups: List[ArtifactSubGroup] = Field(default_factory=list)
 
-    class Config:
-        arbitrary_types_allowed = True
-
     def __post_init__(self):
         self._set_path(self.parent_dir, self.label)
         self._update()
+
+    class Config:
+        arbitrary_types_allowed = True
+
+    def remove_artifact_subgroup(self, label: str) -> None:
+        self._remove_artifact_subgroup_attribute(label)
+        self._remove_artifact_subgroup_from_list(label)
 
     def _set_path(self, parent_dir, label):
         self.path = os.path.join(parent_dir, label)
@@ -135,15 +136,9 @@ class ArtifactGroup:
                 self.remove_artifact_subgroup(elem.label)
                 setattr(self, elem.label, elem)
 
-    def remove_artifact_subgroup(self, label: str) -> None:
-        self._remove_artifact_subgroup_attribute(label)
-        self._remove_artifact_subgroup_from_list(label)
-
-
     def _remove_artifact_subgroup_attribute(self, label: str) -> None:
         if hasattr(self, label):
             delattr(self, label)
-
 
     def _remove_artifact_subgroup_from_list(self, label: str) -> None:
         self.artifacts_subgroups = [elem for elem in self.artifacts_subgroups if elem.label != label]
