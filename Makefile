@@ -1,6 +1,7 @@
 TESTS_PATH := $(PWD)/tests
 WORKDIR_PATH := $(PWD)/workdir
 WORKDIR_MODELS_PATH := $(WORKDIR_PATH)/models
+WORKDIR_DATA_PATH := $(WORKDIR_PATH)/data
 PROJECT_NAME := mlversion
 
 build:
@@ -50,5 +51,9 @@ unit-test:
 	if [ ! -d $(WORKDIR_PATH) ]; then rm -rf $(WORKDIR_PATH); fi
 	mkdir -p $(WORKDIR_PATH);
 	mkdir -p $(WORKDIR_MODELS_PATH);
+	mkdir -p $(WORKDIR_DATA_PATH);
 	pytest $(TESTS_PATH) -vvv  --cov=$(PROJECT_NAME) --cov-report=html --cov-report=term -s
 	rm -rf $(WORKDIR_PATH)
+
+flake:
+	flake8 mlversion

@@ -72,5 +72,5 @@ def test_check_if_new_version_is_greater(version_handler: VersionHandler):
     assert not version_handler._check_if_new_version_is_greater("1.0.0", "1.0.0")
     assert version_handler._check_if_new_version_is_greater(None, "1.0.0")
     assert not version_handler._check_if_new_version_is_greater("1.0.0", None)
-    with pytest.raises(TypeError) as exception:
+    with pytest.raises(TypeError):
         version_handler._check_if_new_version_is_greater(None, None)
