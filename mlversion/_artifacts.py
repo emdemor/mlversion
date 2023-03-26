@@ -2,6 +2,7 @@ from __future__ import annotations
 import os
 from abc import ABC, abstractmethod
 from typing import Any, Optional
+from loguru import logger
 
 import pandas as pd
 from basix import files
@@ -22,7 +23,7 @@ class Artifact(ABC):
         self._set_path(self.parent_dir, self.label)
 
     def _set_path(self, parent_dir, label):
-        self.path = os.path.join(parent_dir, label+".csv")
+        self.path = os.path.join(parent_dir, label)
 
     @abstractmethod
     def save(self) -> Artifact:
@@ -43,9 +44,6 @@ class CSVArtifact(Artifact):
 
     def __str__(self):
         return _get_dataframe_representation(self.content)
-    
-    def _set_path(self, parent_dir, label):
-        self.path = os.path.join(parent_dir, label+".csv")
     
     def save(self) -> CSVArtifact:
         files.make_directory(self.parent_dir)
@@ -68,7 +66,10 @@ class BinaryArtifact(Artifact):
         save_bin(self.content, self.path)
         return self
 
-    def load(self, path: Optional[str]=None):
-        if path is None:
-            path = self.path
-        return load_bin(path)
+    @classmethod
+    def load(cls, label: str, parent_dir: str):
+        path = os.path.join(parent_dir, label)
+        if not os.path.exists(path):
+            raise FileNotFoundError(f"The binary file '{path}' do not exists.")
+        content = load_bin(path)
+        return cls(label=label, content=content, parent_dir=parent_dir)
