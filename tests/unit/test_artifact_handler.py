@@ -2,15 +2,17 @@ from loguru import logger
 import pandas as pd
 from mlversion._artifact_handler import ArtifactGroup, ArtifactSubGroup
 from mlversion._artifacts import CSVArtifact
+from sklearn.linear_model import LinearRegression
 
-def test_artifact():
+def test_csv_artifact():
     df = pd.DataFrame([[0,10],[1,12]], columns=["id", "value"])
-    artifact = CSVArtifact(label="train", content=df, parent_dir="workdir/data/")
+    artifact = CSVArtifact(label="train", content=df, parent_dir="workdir/data/").save()
+    df_imported = pd.read_csv("workdir/data/train.csv")
+    assert df.equals(df_imported)
 
-    logger.warning(artifact.path)
-    
-    #artifact.save()
-    #df = pd.read_csv("workdir/data/train.csv")
+
+def test_binary_artifact():
+    pass
 
 
 # def test_artifact_handler(artifact_handler: ArtifactHandler):
