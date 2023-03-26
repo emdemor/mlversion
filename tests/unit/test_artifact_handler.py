@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from mlversion._artifact_handler import ArtifactSubGroup
 from mlversion._artifacts import CSVArtifact, BinaryArtifact
 
@@ -33,3 +34,18 @@ def test_artifact_subgroup(artifact_subgroup):
 
     assert hasattr(artifact_subgroup_imported, "train")
     assert hasattr(artifact_subgroup_imported, "linear_regression")
+
+
+def test_create_artifact_in_subgroup(artifact_subgroup):
+
+    df = df = pd.DataFrame([[0, 10], [1, 20]], columns=["x", "y"])
+
+    artifact_subgroup = artifact_subgroup.create_artifact(
+        label="new_artifact",
+        content = df,
+        type = "csv_table",
+    ).save()
+
+    artifact_subgroup_imported = ArtifactSubGroup.load(label="artifact_subgroup", parent_dir="workdir/test/")
+
+    assert hasattr(artifact_subgroup_imported, "new_artifact")
