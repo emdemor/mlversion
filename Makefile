@@ -56,4 +56,4 @@ unit-test:
 	rm -rf $(WORKDIR_PATH)
 
 flake:
-	flake8 mlversion
+	flake8 mlversion tests

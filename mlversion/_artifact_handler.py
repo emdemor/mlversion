@@ -1,13 +1,12 @@
 import os
 from typing import List, Optional
-from loguru import logger
 
 from pydantic import Field
 from pydantic.fields import FieldInfo
 from pydantic.dataclasses import dataclass
 
 from mlversion import VersionHandler
-from mlversion._artifacts import Artifact
+from mlversion._artifacts import Artifact, ARTIFACT_TYPES, load_artifact
 
 
 @dataclass
@@ -28,17 +27,52 @@ class ArtifactSubGroup:
         self.path = os.path.join(parent_dir, label)
 
     def _update(self):
-        if not isinstance(self.artifacts,FieldInfo):
+        if not isinstance(self.artifacts, FieldInfo):
             for elem in self.artifacts:
-                self.remove(elem.label)
+                self.remove_artifact(elem.label)
                 setattr(self, elem.label, elem)
 
-    def add(self, artifact: Artifact, overwrite=False):
+    def _add_artifact(self, artifact):
+        self.artifacts.append(artifact)
+        self._update()
+
+    def _set_artifact_to_be_added(self, artifact=None, label=None, content=None, type=None):
+        artifact_passed = artifact is not None
+        label_passed = label is not None
+        content_passed = content is not None
+        type_passed = type is not None
+        new_parent_dir = self.path
+
+        if artifact_passed and (not label_passed) and (not content_passed) and (not type_passed):
+            label = artifact.label
+            content = artifact.content
+            type = artifact.type
+
+        if artifact_passed and (label_passed or content_passed or type_passed):
+            raise IncompatibleArgumentsError("If you pass and artifact, you cannot pass " "label nether the content")
+
+        ArtifactClass = ARTIFACT_TYPES[type]
+
+        return ArtifactClass(
+            label=label,
+            content=content,
+            parent_dir=new_parent_dir,
+        )
+
+    def create_artifact(self, label, content, type, overwrite=False):
+        if hasattr(self, label) and not overwrite:
+            raise ExistingAttributeError(self, label)
+        artifact = self._set_artifact_to_be_added(label=label, content=content)
+        self._add_artifact(artifact)
+        return self
+
+    def add_artifact(self, artifact: Artifact, overwrite=False):
         if isinstance(artifact, Artifact):
             if hasattr(self, artifact.label) and not overwrite:
                 raise ExistingAttributeError(self, artifact.label)
-            self.artifacts.append(artifact)
-            self._update()
+            artifact = self._set_artifact_to_be_added(artifact=artifact)
+            self._add_artifact(artifact)
+
         else:
             raise TypeError(
                 "To use the method 'add' of and object of the class "
@@ -46,17 +80,27 @@ class ArtifactSubGroup:
             )
         return self
 
-    def remove(self, label: str):
+    def remove_artifact(self, label: str):
         if hasattr(self, label):
             delattr(self, label)
 
     def save(self):
-        pass
+        if not isinstance(self.artifacts, FieldInfo):
+            for artifact in self.artifacts:
+                artifact.save()
 
+        return self
 
-    # @classmethod
-    # def load(cls, label: str, parent_dir: str):
-    #     for label in os.listdir(parent_dir):
+    @classmethod
+    def load(cls, label: str, parent_dir: str):
+        subgroup = ArtifactSubGroup(label=label, parent_dir=parent_dir)
+        path = os.path.join(parent_dir, label)
+        for label in os.listdir(path):
+            artifact_path = os.path.join(path, label)
+            artifact = load_artifact(artifact_path)
+            subgroup.add_artifact(artifact)
+        return subgroup
+
     #         artifact_parent_dir = os.path.join(parent_dir, label)
     #         artifact = Artifact.load(artifact_parent_dir)
 
@@ -69,6 +113,7 @@ class ArtifactSubGroup:
     #                 self.latest_version = version
     #         else:
     #             raise vs.InvalidVersion(f"'{subdir} is not a valid version.")
+
 
 @dataclass
 class ArtifactGroup:
@@ -113,10 +158,12 @@ class ArtifactHandler:
             ],
         )
 
+
 class ExistingAttributeError(Exception):
     def __init__(self, object, attribute_name):
-        message = (
-            f"Attribute {attribute_name} already exists in object "
-            f"of the class {object.__class__}."
-        )
+        message = f"Attribute {attribute_name} already exists in object " f"of the class {object.__class__}."
         super().__init__(message)
+
+
+class IncompatibleArgumentsError(Exception):
+    pass

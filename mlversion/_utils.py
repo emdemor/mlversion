@@ -33,3 +33,10 @@ def create_folder_chain(path: Union[str, Path]) -> None:
     else:
         parent_dir = path_obj.parent
         os.makedirs(parent_dir, exist_ok=True)
+
+
+def get_dirname(dirpath):
+    if not os.path.isdir(dirpath):
+        raise NotADirectoryError("'{dirpath}' is not a directory path")
+    path = Path(dirpath)
+    return path.parts[-1]

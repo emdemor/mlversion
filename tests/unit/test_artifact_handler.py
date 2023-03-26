@@ -1,9 +1,6 @@
-from loguru import logger
 import numpy as np
-import pandas as pd
-from mlversion._artifact_handler import ArtifactGroup, ArtifactSubGroup
+from mlversion._artifact_handler import ArtifactSubGroup
 from mlversion._artifacts import CSVArtifact, BinaryArtifact
-from sklearn.linear_model import LinearRegression
 
 
 def test_csv_artifact(csv_artifact):
@@ -27,3 +24,12 @@ def test_binary_artifact(bin_artifact):
 
     assert np.isclose(expected_value, prediction)
 
+
+def test_artifact_subgroup(artifact_subgroup):
+
+    artifact_subgroup.save()
+
+    artifact_subgroup_imported = ArtifactSubGroup.load(label="artifact_subgroup", parent_dir="workdir/test/")
+
+    assert hasattr(artifact_subgroup_imported, "train")
+    assert hasattr(artifact_subgroup_imported, "linear_regression")
