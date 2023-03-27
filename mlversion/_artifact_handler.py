@@ -17,8 +17,8 @@ class ArtifactSubGroup:
     artifacts: List[Artifact] = Field(default_factory=list)
 
     def __post_init__(self):
-        self._set_path(self.parent_dir, self.label)
-        self._update()
+        self.set_path(self.parent_dir, self.label)
+        self.update()
 
     class Config:
         arbitrary_types_allowed = True
@@ -56,7 +56,7 @@ class ArtifactSubGroup:
 
         else:
             raise TypeError(
-                "To use the method 'add' of and object of the class "
+                "To use the method 'add_artifact' of and object of the class "
                 f"{self.__class__.__name__}, you must pass an 'Artifact' object."
             )
         return self
@@ -65,18 +65,25 @@ class ArtifactSubGroup:
         self._remove_artifact_attribute(label)
         self._remove_artifact_from_list(label)
 
-    def _set_path(self, parent_dir, label):
+    def update_artifacts_paths(self):
+        new_parent_dir = os.path.join(self.parent_dir, self.label)
+        for art in self.artifacts:
+            art.set_path(new_parent_dir, art.label )
+
+    def set_path(self, parent_dir, label):
         self.path = os.path.join(parent_dir, label)
 
-    def _update(self):
+    def update(self):
         if not isinstance(self.artifacts, FieldInfo):
             for elem in self.artifacts:
                 self._remove_artifact_attribute(elem.label)
                 setattr(self, elem.label, elem)
 
+            self.update_artifacts_paths()
+
     def _add_artifact(self, artifact):
         self.artifacts.append(artifact)
-        self._update()
+        self.update()
 
     def _set_artifact_to_be_added(self, artifact=None, label=None, content=None, type=None):
         artifact_passed = artifact is not None
@@ -117,14 +124,32 @@ class ArtifactGroup:
     subgroups: List[ArtifactSubGroup] = Field(default_factory=list)
 
     def __post_init__(self):
-        self._set_path(self.parent_dir, self.label)
-        self._update()
+        self.set_path(self.parent_dir, self.label)
+        self.update()
 
     class Config:
         arbitrary_types_allowed = True
 
-    def add_subgroup():
-        pass
+    def save(self):
+        if not isinstance(self.subgroups, FieldInfo):
+            for subgroup in self.subgroups:
+                subgroup.save()
+
+        return self
+
+    def add_subgroup(self, subgroup: ArtifactSubGroup, overwrite=False):
+        if isinstance(subgroup, ArtifactSubGroup):
+            if hasattr(self, subgroup.label) and not overwrite:
+                raise ExistingAttributeError(self, subgroup.label)
+            subgroup = self._set_subgroup_to_be_added(subgroup=subgroup)
+            self._add_subgroup(subgroup)
+
+        else:
+            raise TypeError(
+                "To use the method 'add_subgroup' of and object of the class "
+                f"{self.__class__.__name__}, you must pass an 'ArtifactSubGroup' object."
+            )
+        return self
 
     def create_subgroup():
         pass
@@ -133,10 +158,10 @@ class ArtifactGroup:
         self._remove_subgroup_attribute(label)
         self._remove_subgroup_from_list(label)
 
-    def _set_path(self, parent_dir, label):
+    def set_path(self, parent_dir, label):
         self.path = os.path.join(parent_dir, label)
 
-    def _update(self):
+    def update(self):
         if not isinstance(self.subgroups, FieldInfo):
             for elem in self.subgroups:
                 self._remove_subgroup_attribute(elem.label)
@@ -149,6 +174,32 @@ class ArtifactGroup:
     def _remove_subgroup_from_list(self, label: str) -> None:
         self.subgroups = [elem for elem in self.subgroups if elem.label != label]
 
+    def _set_subgroup_to_be_added(self, subgroup=None, label=None, artifacts=None):
+        subgroup_passed = subgroup is not None
+        label_passed = label is not None
+        artifacts_passed = artifacts is not None
+        new_parent_dir = self.path
+
+        if subgroup_passed and (not label_passed) and (not artifacts_passed):
+            label = subgroup.label
+            artifacts = subgroup.artifacts
+
+        if subgroup_passed and (label_passed or artifacts_passed):
+            raise IncompatibleArgumentsError("If you pass and subgroup, you cannot pass the artifacts")
+        
+        for art in artifacts:
+            art.set_path(os.path.join(new_parent_dir, label), art.label)
+
+        return ArtifactSubGroup(
+            label=label,
+            parent_dir=new_parent_dir,
+            artifacts=artifacts,
+        )
+
+    def _add_subgroup(self, subgroup):
+        self.subgroups.append(subgroup)
+        self.update()
+
 
 class ArtifactHandler:
     def __init__(self, path):
@@ -156,8 +207,8 @@ class ArtifactHandler:
         self._version_handler = VersionHandler(self.path)
         self.data: ArtifactGroup = self._set_data()
 
-    def _update_versions(self):
-        self._version_handler._update()
+    def update_versions(self):
+        self._version_handler.update()
 
     def _set_data(self):
         return ArtifactGroup(
