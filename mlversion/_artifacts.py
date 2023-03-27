@@ -21,10 +21,11 @@ class Artifact(ABC, object):
     path: Optional[str] = None
 
     def __post_init__(self):
-        self._set_path(self.parent_dir, self.label)
+        self.set_path(self.parent_dir, self.label)
 
-    def _set_path(self, parent_dir, label):
-        self.path = os.path.join(parent_dir, label)
+    def set_path(self, parent_dir, label):
+        setattr(self, "parent_dir", parent_dir)
+        setattr(self, "path", os.path.join(parent_dir, label))
 
     def get(self):
         return self.content
