@@ -58,6 +58,8 @@ class VersionHandler:
 
         self._update()
 
+        return self
+
     def add_new_version(self, version_string: str) -> None:
         """
         Add a new version to the directory.
