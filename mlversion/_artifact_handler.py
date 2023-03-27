@@ -1,5 +1,7 @@
+import json
 import os
 from typing import List, Optional
+from loguru import logger
 
 from pydantic import Field
 from pydantic.fields import FieldInfo
@@ -7,6 +9,7 @@ from pydantic.dataclasses import dataclass
 
 from mlversion import VersionHandler
 from mlversion._artifacts import Artifact, ARTIFACT_TYPES, load_artifact
+from mlversion._utils import get_dirname
 
 
 @dataclass
@@ -137,6 +140,16 @@ class ArtifactGroup:
 
         return self
 
+    @classmethod
+    def load(cls, label: str, parent_dir: str):
+        group = ArtifactGroup(label=label, parent_dir=parent_dir)
+        path = os.path.join(parent_dir, label)
+        for label in os.listdir(path):
+            subgroup_path = os.path.join(path, label)
+            subgroup = cls._load_subgroup(subgroup_path)
+            group.add_subgroup(subgroup)
+        return group
+
     def add_subgroup(self, subgroup: ArtifactSubGroup, overwrite=False):
         if isinstance(subgroup, ArtifactSubGroup):
             if hasattr(self, subgroup.label) and not overwrite:
@@ -199,6 +212,15 @@ class ArtifactGroup:
     def _add_subgroup(self, subgroup):
         self.subgroups.append(subgroup)
         self.update()
+
+    @classmethod
+    def _load_subgroup(cls, subgroup_path: str):
+        if not os.path.isdir(subgroup_path):
+            raise NotADirectoryError("'{subgroup_path}' is not a valid artifact path")
+        parent_dir = os.path.dirname(subgroup_path)
+        label = get_dirname(subgroup_path)
+        subgroup = ArtifactSubGroup.load(label, parent_dir)
+        return subgroup
 
 
 class ArtifactHandler:
