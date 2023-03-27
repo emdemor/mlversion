@@ -7,7 +7,7 @@ from sklearn.linear_model import LinearRegression
 
 from mlversion import ModelVersion, VersionHandler
 from mlversion._artifacts import CSVArtifact, BinaryArtifact
-from mlversion._artifact_handler import ArtifactSubGroup
+from mlversion._artifact_handler import ArtifactSubGroup, ArtifactGroup
 
 
 @pytest.fixture()
@@ -47,6 +47,15 @@ def artifact_subgroup(csv_artifact, bin_artifact):
         .add_artifact(bin_artifact)
     )
     return artifact_subgroup
+
+
+@pytest.fixture()
+def artifact_group(artifact_subgroup):
+    artifact_group = (
+        ArtifactGroup(label="clustering", parent_dir="workdir/test/")
+        .add_subgroup(artifact_subgroup)
+    )
+    return artifact_group
 
 
 @pytest.fixture()

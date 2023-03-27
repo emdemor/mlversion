@@ -67,6 +67,7 @@ class ArtifactSubGroup:
     def remove_artifact(self, label: str):
         self._remove_artifact_attribute(label)
         self._remove_artifact_from_list(label)
+        return self
 
     def update_artifacts_paths(self):
         new_parent_dir = os.path.join(self.parent_dir, self.label)
@@ -170,6 +171,7 @@ class ArtifactGroup:
     def remove_subgroup(self, label: str) -> None:
         self._remove_subgroup_attribute(label)
         self._remove_subgroup_from_list(label)
+        return self
 
     def set_path(self, parent_dir, label):
         self.path = os.path.join(parent_dir, label)
