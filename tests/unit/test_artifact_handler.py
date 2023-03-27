@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from mlversion._artifact_handler import ArtifactSubGroup
+from mlversion._artifact_handler import ArtifactSubGroup, ArtifactGroup
 from mlversion._artifacts import CSVArtifact, BinaryArtifact
 
 
@@ -30,7 +30,7 @@ def test_artifact_subgroup(artifact_subgroup):
 
     artifact_subgroup.save()
 
-    artifact_subgroup_imported = ArtifactSubGroup.load(label="artifact_subgroup", parent_dir="workdir/test/")
+    artifact_subgroup_imported = ArtifactSubGroup.load(label="poc", parent_dir="workdir/test/")
 
     assert hasattr(artifact_subgroup_imported, "train")
     assert hasattr(artifact_subgroup_imported, "linear_regression")
@@ -46,7 +46,7 @@ def test_create_artifact_in_subgroup(artifact_subgroup):
         type = "csv_table",
     ).save()
 
-    artifact_subgroup_imported = ArtifactSubGroup.load(label="artifact_subgroup", parent_dir="workdir/test/")
+    artifact_subgroup_imported = ArtifactSubGroup.load(label="poc", parent_dir="workdir/test/")
 
     assert hasattr(artifact_subgroup_imported, "new_artifact")
 
@@ -65,5 +65,12 @@ def test_remove_artifact_in_subgroup(artifact_subgroup):
     assert not has_train_end
     assert all([a.label != "train" for a in artifact_subgroup.artifacts])
 
-def test_artifact_group():
-    pass
+def test_artifact_group(artifact_subgroup):
+    artifact_group = (
+        ArtifactGroup(
+            label="cluster_socioeconomico",
+            parent_dir="workdir/test"
+        )
+        .add_subgroup(artifact_subgroup)
+        .save()
+    )
