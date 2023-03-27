@@ -42,7 +42,7 @@ def bin_artifact():
 @pytest.fixture()
 def artifact_subgroup(csv_artifact, bin_artifact):
     artifact_subgroup = (
-        ArtifactSubGroup(label="artifact_subgroup", parent_dir="workdir/test/")
+        ArtifactSubGroup(label="poc", parent_dir="workdir/test/")
         .add_artifact(csv_artifact)
         .add_artifact(bin_artifact)
     )
