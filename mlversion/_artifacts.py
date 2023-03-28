@@ -9,7 +9,7 @@ import pandas as pd
 from basix import files
 from pydantic.dataclasses import dataclass
 
-from mlversion._utils import _get_dataframe_representation, save_bin, load_bin, get_dirname
+from mlversion._utils import get_dataframe_representation, save_bin, load_bin, get_dirname
 
 
 @dataclass
@@ -21,10 +21,11 @@ class Artifact(ABC, object):
     path: Optional[str] = None
 
     def __post_init__(self):
-        self._set_path(self.parent_dir, self.label)
+        self.set_path(self.parent_dir, self.label)
 
-    def _set_path(self, parent_dir, label):
-        self.path = os.path.join(parent_dir, label)
+    def set_path(self, parent_dir, label):
+        setattr(self, "parent_dir", parent_dir)
+        setattr(self, "path", os.path.join(parent_dir, label))
 
     def get(self):
         return self.content
@@ -60,11 +61,11 @@ class CSVArtifact(Artifact):
     def __init__(self, label: str, content: pd.DataFrame, parent_dir: str):
         super().__init__(label=label, content=content, type=self.type, parent_dir=parent_dir, path=self.path)
 
-    def __repr__(self):
-        return _get_dataframe_representation(self.content)
+    # def __repr__(self):
+    #     return get_dataframe_representation(self.content)
 
-    def __str__(self):
-        return _get_dataframe_representation(self.content)
+    # def __str__(self):
+    #     return get_dataframe_representation(self.content)
 
     def save(self) -> CSVArtifact:
         files.make_directory(self.path)

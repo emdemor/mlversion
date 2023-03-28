@@ -1,6 +1,7 @@
+from loguru import logger
 import numpy as np
 import pandas as pd
-from mlversion._artifact_handler import ArtifactSubGroup
+from mlversion._artifact_handler import ArtifactSubGroup, ArtifactGroup, ArtifactHandler
 from mlversion._artifacts import CSVArtifact, BinaryArtifact
 
 
@@ -18,9 +19,7 @@ def test_binary_artifact(bin_artifact):
     expected_value = bin_artifact.get().predict([[2]])[0]
     bin_artifact.save()
 
-    imported_artifact = BinaryArtifact.load(
-        label="linear_regression", parent_dir="workdir/test/models/"
-    )
+    imported_artifact = BinaryArtifact.load(label="linear_regression", parent_dir="workdir/test/models/")
     prediction = imported_artifact.get().predict([[2]])[0]
 
     assert np.isclose(expected_value, prediction)
@@ -30,7 +29,7 @@ def test_artifact_subgroup(artifact_subgroup):
 
     artifact_subgroup.save()
 
-    artifact_subgroup_imported = ArtifactSubGroup.load(label="artifact_subgroup", parent_dir="workdir/test/")
+    artifact_subgroup_imported = ArtifactSubGroup.load(label="poc", parent_dir="workdir/test/")
 
     assert hasattr(artifact_subgroup_imported, "train")
     assert hasattr(artifact_subgroup_imported, "linear_regression")
@@ -38,15 +37,15 @@ def test_artifact_subgroup(artifact_subgroup):
 
 def test_create_artifact_in_subgroup(artifact_subgroup):
 
-    df = df = pd.DataFrame([[0, 10], [1, 20]], columns=["x", "y"])
+    df = pd.DataFrame([[0, 10], [1, 20]], columns=["x", "y"])
 
     artifact_subgroup = artifact_subgroup.create_artifact(
         label="new_artifact",
-        content = df,
-        type = "csv_table",
+        content=df,
+        type="csv_table",
     ).save()
 
-    artifact_subgroup_imported = ArtifactSubGroup.load(label="artifact_subgroup", parent_dir="workdir/test/")
+    artifact_subgroup_imported = ArtifactSubGroup.load(label="poc", parent_dir="workdir/test/")
 
     assert hasattr(artifact_subgroup_imported, "new_artifact")
 
@@ -58,12 +57,55 @@ def test_remove_artifact_in_subgroup(artifact_subgroup):
     assert has_train_start
     assert any([a.label == "train" for a in artifact_subgroup.artifacts])
 
-    artifact_subgroup.remove_artifact(label = "train")
+    artifact_subgroup.remove_artifact(label="train")
 
     has_train_end = hasattr(artifact_subgroup, "train")
 
     assert not has_train_end
     assert all([a.label != "train" for a in artifact_subgroup.artifacts])
 
-def test_artifact_group():
-    pass
+
+def test_artifact_group(artifact_group, csv_artifact, bin_artifact):
+
+    parent_dir = "workdir/test/"
+
+    mvp = ArtifactSubGroup(label="mvp", parent_dir=parent_dir).add_artifact(csv_artifact).add_artifact(bin_artifact)
+
+    group = artifact_group.add_subgroup(mvp).save()
+
+    group_imported = ArtifactGroup.load(label="clustering", parent_dir=parent_dir)
+
+    subgroups = sorted([s.label for s in group.subgroups])
+    imported_subgroups = sorted([s.label for s in group_imported.subgroups])
+
+    assert all([(a, b) for a, b in zip(subgroups, imported_subgroups)])
+
+
+def test_remove_subgroup_from_artifact_group(artifact_group, csv_artifact, bin_artifact):
+    parent_dir = "workdir/test/"
+    mvp = ArtifactSubGroup(label="mvp", parent_dir=parent_dir).add_artifact(csv_artifact).add_artifact(bin_artifact)
+    group = artifact_group.add_subgroup(mvp).save()
+    group_imported = ArtifactGroup.load(label="clustering", parent_dir=parent_dir)
+
+    group_imported = group_imported.remove_subgroup("mvp")
+
+    assert hasattr(group, "mvp")
+    assert not hasattr(group_imported, "mvp")
+
+
+def test_artifact_handler(artifact_handler):
+    artifact_handler.increment_version_patch().commit()
+
+    new_artifact_handler = ArtifactHandler.load(parent_dir="workdir/handler")
+
+    assert artifact_handler.version == new_artifact_handler.version
+
+def test_artifact_handler_pull(artifact_handler):
+    
+    artifact_handler.increment_version_patch().commit()
+
+    new_artifact_handler = ArtifactHandler("workdir/handler").pull()
+
+    assert artifact_handler.version == new_artifact_handler.version
+    
+
