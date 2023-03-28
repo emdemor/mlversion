@@ -3,11 +3,16 @@ import pandas as pd
 
 import pytest
 from basix import files
+import sklearn
 from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import StandardScaler
 
 from mlversion import ModelVersion, VersionHandler
 from mlversion._artifacts import CSVArtifact, BinaryArtifact
-from mlversion._artifact_handler import ArtifactSubGroup, ArtifactGroup
+from mlversion._artifact_handler import ArtifactSubGroup, ArtifactGroup, ArtifactHandler
+
+
+sklearn.set_config(transform_output = "pandas")
 
 
 @pytest.fixture()
@@ -68,3 +73,36 @@ def model_version(start_version_string):
 def version_handler(models_path):
     version_handler = VersionHandler(models_path)
     return version_handler
+
+@pytest.fixture()
+def artifact_handler():
+    artifact_handler = ArtifactHandler(parent_dir = "workdir/handler")
+
+    scaler = StandardScaler()
+    estimator = LinearRegression()
+
+    X_train = pd.DataFrame([[0, 10], [1, 20]], columns=["a", "b"])
+    X_test = pd.DataFrame([[0, 11], [1, 21]], columns=["a", "b"])
+    y_train = pd.Series([3,4])
+    y_test = pd.Series([3,4])
+
+    X_predict = pd.DataFrame([[0, 10.1], [1.1, 20.1]], columns=["a", "b"])
+
+    scaler.fit(X_train, y_train)
+
+    X_train_transformed = scaler.transform(X_train)
+    X_test_transformed = scaler.transform(X_test)
+
+    estimator.fit(X_train_transformed, y_train)
+
+    artifact_handler.data.raw.create_artifact(label="X_train", content=X_train, type="csv_table")
+    artifact_handler.data.raw.create_artifact(label="X_test", content=X_test, type="csv_table")
+    artifact_handler.data.raw.create_artifact(label="X_predict", content=X_predict, type="csv_table")
+    artifact_handler.data.raw.create_artifact(label="y_train", content=y_train, type="csv_table")
+    artifact_handler.data.raw.create_artifact(label="y_test", content=y_test, type="csv_table")
+    artifact_handler.data.transformed.create_artifact(label="X_train_transformed", content=X_train_transformed, type="csv_table")
+    artifact_handler.data.transformed.create_artifact(label="X_test_transformed", content=X_test_transformed, type="csv_table")
+    artifact_handler.models.transformers.create_artifact(label="scaler", content=scaler, type="model_binary")
+    artifact_handler.models.estimators.create_artifact(label="estimator", content=estimator, type="model_binary")
+
+    return artifact_handler

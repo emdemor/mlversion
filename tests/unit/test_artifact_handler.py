@@ -1,7 +1,7 @@
 from loguru import logger
 import numpy as np
 import pandas as pd
-from mlversion._artifact_handler import ArtifactSubGroup, ArtifactGroup
+from mlversion._artifact_handler import ArtifactSubGroup, ArtifactGroup, ArtifactHandler
 from mlversion._artifacts import CSVArtifact, BinaryArtifact
 
 
@@ -37,7 +37,7 @@ def test_artifact_subgroup(artifact_subgroup):
 
 def test_create_artifact_in_subgroup(artifact_subgroup):
 
-    df = df = pd.DataFrame([[0, 10], [1, 20]], columns=["x", "y"])
+    df = pd.DataFrame([[0, 10], [1, 20]], columns=["x", "y"])
 
     artifact_subgroup = artifact_subgroup.create_artifact(
         label="new_artifact",
@@ -71,11 +71,7 @@ def test_artifact_group(artifact_group, csv_artifact, bin_artifact):
 
     mvp = ArtifactSubGroup(label="mvp", parent_dir=parent_dir).add_artifact(csv_artifact).add_artifact(bin_artifact)
 
-    group = (
-        artifact_group
-        .add_subgroup(mvp)
-        .save()
-    )
+    group = artifact_group.add_subgroup(mvp).save()
 
     group_imported = ArtifactGroup.load(label="clustering", parent_dir=parent_dir)
 
@@ -88,14 +84,20 @@ def test_artifact_group(artifact_group, csv_artifact, bin_artifact):
 def test_remove_subgroup_from_artifact_group(artifact_group, csv_artifact, bin_artifact):
     parent_dir = "workdir/test/"
     mvp = ArtifactSubGroup(label="mvp", parent_dir=parent_dir).add_artifact(csv_artifact).add_artifact(bin_artifact)
-    group = (
-        artifact_group
-        .add_subgroup(mvp)
-        .save()
-    )
+    group = artifact_group.add_subgroup(mvp).save()
     group_imported = ArtifactGroup.load(label="clustering", parent_dir=parent_dir)
 
     group_imported = group_imported.remove_subgroup("mvp")
 
     assert hasattr(group, "mvp")
     assert not hasattr(group_imported, "mvp")
+
+
+def test_artifact_handler(artifact_handler):
+    artifact_handler.increment_version_patch().commit()
+
+    new_artifact_handler = ArtifactHandler.load(parent_dir="workdir/handler")
+
+    assert artifact_handler.version == new_artifact_handler.version
+
+
