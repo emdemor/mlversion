@@ -11,6 +11,10 @@ class ModelVersion(vs.Version):
         self.version_str = version_str
         super().__init__(self.version_str)
 
+    @property
+    def dirname(self):
+        return f"version={self.version_str}"
+
 
 class VersionHandler:
     """
