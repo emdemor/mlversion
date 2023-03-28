@@ -100,4 +100,12 @@ def test_artifact_handler(artifact_handler):
 
     assert artifact_handler.version == new_artifact_handler.version
 
+def test_artifact_handler_pull(artifact_handler):
+    
+    artifact_handler.increment_version_patch().commit()
+
+    new_artifact_handler = ArtifactHandler("workdir/handler").pull()
+
+    assert artifact_handler.version == new_artifact_handler.version
+    
 

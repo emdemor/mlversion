@@ -249,19 +249,20 @@ class ArtifactHandler:
     @property
     def version(self):
         return self._version_handler.latest_version
-    
+
     @classmethod
     def load(cls, parent_dir):
         ah = cls(parent_dir=parent_dir)
+        return cls._load_from_file(ah, parent_dir)
 
+    def pull(self):
+        return self._load_from_file(self, self.parent_dir)
+
+    @staticmethod
+    def _load_from_file(ah, parent_dir):
         path = os.path.join(parent_dir, f"version={ah.version}")
-
-        for group in [cls._data_group_name, cls._models_group_name]:
-
-            artifact_group = ArtifactGroup.load(
-                label=group,
-                parent_dir = path
-            )
+        for group in [ah._data_group_name, ah._models_group_name]:
+            artifact_group = ArtifactGroup.load(label=group, parent_dir=path)
             setattr(ah, group, artifact_group)
         return ah
 
