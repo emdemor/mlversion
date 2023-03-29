@@ -95,14 +95,14 @@ def artifact_handler():
 
     estimator.fit(X_train_transformed, y_train)
 
-    artifact_handler.data.raw.create_artifact(label="X_train", content=X_train, type="csv_table")
-    artifact_handler.data.raw.create_artifact(label="X_test", content=X_test, type="csv_table")
-    artifact_handler.data.raw.create_artifact(label="X_predict", content=X_predict, type="csv_table")
-    artifact_handler.data.raw.create_artifact(label="y_train", content=y_train, type="csv_table")
-    artifact_handler.data.raw.create_artifact(label="y_test", content=y_test, type="csv_table")
-    artifact_handler.data.transformed.create_artifact(label="X_train_transformed", content=X_train_transformed, type="csv_table")
-    artifact_handler.data.transformed.create_artifact(label="X_test_transformed", content=X_test_transformed, type="csv_table")
-    artifact_handler.models.transformers.create_artifact(label="scaler", content=scaler, type="model_binary")
-    artifact_handler.models.estimators.create_artifact(label="estimator", content=estimator, type="model_binary")
+    artifact_handler.data.raw.create_artifact(label="X_train", content=X_train, type="csv")
+    artifact_handler.data.raw.create_artifact(label="X_test", content=X_test, type="csv")
+    artifact_handler.data.raw.create_artifact(label="X_predict", content=X_predict, type="csv")
+    artifact_handler.data.raw.create_artifact(label="y_train", content=y_train, type="csv")
+    artifact_handler.data.raw.create_artifact(label="y_test", content=y_test, type="csv")
+    artifact_handler.data.transformed.create_artifact(label="X_train_transformed", content=X_train_transformed, type="csv")
+    artifact_handler.data.transformed.create_artifact(label="X_test_transformed", content=X_test_transformed, type="csv")
+    artifact_handler.models.transformers.create_artifact(label="scaler", content=scaler, type="binary")
+    artifact_handler.models.estimators.create_artifact(label="estimator", content=estimator, type="binary")
 
     return artifact_handler

@@ -56,7 +56,7 @@ class Artifact(ABC, object):
 
 
 class CSVArtifact(Artifact):
-    type: str = "csv_table"
+    type: str = "csv"
 
     def __init__(self, label: str, content: pd.DataFrame, parent_dir: str):
         super().__init__(label=label, content=content, type=self.type, parent_dir=parent_dir, path=self.path)
@@ -95,7 +95,7 @@ class CSVArtifact(Artifact):
 
 
 class BinaryArtifact(Artifact):
-    type: str = "model_binary"
+    type: str = "binary"
 
     def __init__(self, label: str, content: Any, parent_dir: str):
         super().__init__(label=label, content=content, type=self.type, parent_dir=parent_dir, path=self.path)

@@ -42,7 +42,7 @@ def test_create_artifact_in_subgroup(artifact_subgroup):
     artifact_subgroup = artifact_subgroup.create_artifact(
         label="new_artifact",
         content=df,
-        type="csv_table",
+        type="csv",
     ).save()
 
     artifact_subgroup_imported = ArtifactSubGroup.load(label="poc", parent_dir="workdir/test/")
