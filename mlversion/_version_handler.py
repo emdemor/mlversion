@@ -5,6 +5,8 @@ from typing import List, Optional, Union
 from basix import files
 from packaging import version as vs
 
+from mlversion.errors import ExistingVersionError
+
 
 class ModelVersion(vs.Version):
     def __init__(self, version_str: str):
@@ -175,6 +177,3 @@ class VersionHandler:
         if new_version > old_version:
             return True
 
-
-class ExistingVersionError(Exception):
-    pass

@@ -10,6 +10,7 @@ from basix import files
 from pydantic.dataclasses import dataclass
 
 from mlversion._utils import get_dataframe_representation, save_bin, load_bin, get_dirname
+from mlversion.errors import IncompatibleArtifactTypeError
 
 
 @dataclass
@@ -133,7 +134,6 @@ class ParquetArtifact(Artifact):
         return pd.read_parquet(content_path, *args, **kwargs)
 
 
-
 class BinaryArtifact(Artifact):
     type: str = "binary"
 
@@ -165,12 +165,6 @@ class BinaryArtifact(Artifact):
     def _load_content(cls, path):
         content_path = os.path.join(path, "content")
         return load_bin(content_path)
-
-
-class IncompatibleArtifactTypeError(Exception):
-    def __init__(self, expected_type, local_type):
-        message = f"Local artifact type {local_type} is incompatible with " f"the expected type {expected_type}."
-        super().__init__(message)
 
 
 def get_artifact_classes():

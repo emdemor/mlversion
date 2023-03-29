@@ -1,4 +1,3 @@
-import json
 import os
 from typing import List, Optional
 from loguru import logger
@@ -12,6 +11,7 @@ from basix import files
 from mlversion import VersionHandler
 from mlversion._artifacts import Artifact, ARTIFACT_TYPES, load_artifact
 from mlversion._utils import get_dirname
+from mlversion.errors import ExistingAttributeError, IncompatibleArgumentsError
 
 
 @dataclass
@@ -321,11 +321,3 @@ class ArtifactHandler:
         )
 
 
-class ExistingAttributeError(Exception):
-    def __init__(self, object, attribute_name):
-        message = f"Attribute {attribute_name} already exists in object " f"of the class {object.__class__}."
-        super().__init__(message)
-
-
-class IncompatibleArgumentsError(Exception):
-    pass
