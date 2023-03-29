@@ -176,4 +176,3 @@ class VersionHandler:
 
         if new_version > old_version:
             return True
-

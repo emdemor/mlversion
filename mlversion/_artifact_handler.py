@@ -319,5 +319,3 @@ class ArtifactHandler:
                 ArtifactSubGroup(label="transformers", parent_dir=os.path.join(self.path, self._models_group_name)),
             ],
         )
-
-
