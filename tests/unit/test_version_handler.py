@@ -5,7 +5,8 @@ import pytest
 from packaging import version as vs
 from basix import files
 
-from mlversion import ModelVersion, VersionHandler, ExistingVersionError
+from mlversion import ModelVersion, VersionHandler
+from mlversion.errors import ExistingVersionError
 
 
 def test_model_version(model_version: ModelVersion):
