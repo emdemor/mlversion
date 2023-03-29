@@ -61,11 +61,11 @@ class CSVArtifact(Artifact):
     def __init__(self, label: str, content: pd.DataFrame, parent_dir: str):
         super().__init__(label=label, content=content, type=self.type, parent_dir=parent_dir, path=self.path)
 
-    # def __repr__(self):
-    #     return get_dataframe_representation(self.content)
+    def __repr__(self):
+        return get_dataframe_representation(self.content)
 
-    # def __str__(self):
-    #     return get_dataframe_representation(self.content)
+    def __str__(self):
+        return get_dataframe_representation(self.content)
 
     def save(self) -> CSVArtifact:
         files.make_directory(self.path)
