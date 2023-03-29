@@ -100,8 +100,8 @@ def artifact_handler():
     artifact_handler.data.raw.create_artifact(label="X_predict", content=X_predict, type="csv")
     artifact_handler.data.raw.create_artifact(label="y_train", content=y_train, type="csv")
     artifact_handler.data.raw.create_artifact(label="y_test", content=y_test, type="csv")
-    artifact_handler.data.transformed.create_artifact(label="X_train_transformed", content=X_train_transformed, type="csv")
-    artifact_handler.data.transformed.create_artifact(label="X_test_transformed", content=X_test_transformed, type="csv")
+    artifact_handler.data.transformed.create_artifact(label="X_train_transformed", content=X_train_transformed, type="parquet")
+    artifact_handler.data.transformed.create_artifact(label="X_test_transformed", content=X_test_transformed, type="parquet")
     artifact_handler.models.transformers.create_artifact(label="scaler", content=scaler, type="binary")
     artifact_handler.models.estimators.create_artifact(label="estimator", content=estimator, type="binary")
 

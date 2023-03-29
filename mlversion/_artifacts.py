@@ -94,6 +94,46 @@ class CSVArtifact(Artifact):
         return pd.read_csv(content_path)
 
 
+class ParquetArtifact(Artifact):
+    type: str = "parquet"
+
+    def __init__(self, label: str, content: pd.DataFrame, parent_dir: str):
+        super().__init__(label=label, content=content, type=self.type, parent_dir=parent_dir, path=self.path)
+
+    def __repr__(self):
+        return get_dataframe_representation(self.content)
+
+    def __str__(self):
+        return get_dataframe_representation(self.content)
+
+    def save(self, *args, **kwargs) -> ParquetArtifact:
+        files.make_directory(self.path)
+        self._save_content(*args, **kwargs)
+        self._save_metadata()
+        return self
+
+    def _save_content(self, *args, **kwargs):
+        content_filepath = os.path.join(self.path, "content")
+        logger.debug(f"Saving csv artifact to {content_filepath}")
+        self.content.to_parquet(content_filepath, index=False, *args, **kwargs)
+
+    @classmethod
+    def load(cls, label: str, parent_dir: str, *args, **kwargs):
+        path = os.path.join(parent_dir, label)
+        if not os.path.exists(path):
+            raise FileNotFoundError(f"The csv table '{path}' do not exists.")
+        logger.debug(f"Loading csv artifact from {path}")
+        cls._load_metadata(path)
+        content = cls._load_content(path, *args, **kwargs)
+        return cls(label=label, content=content, parent_dir=parent_dir)
+
+    @classmethod
+    def _load_content(cls, path, *args, **kwargs):
+        content_path = os.path.join(path, "content")
+        return pd.read_parquet(content_path, *args, **kwargs)
+
+
+
 class BinaryArtifact(Artifact):
     type: str = "binary"
 
