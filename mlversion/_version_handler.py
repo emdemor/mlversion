@@ -9,12 +9,51 @@ from mlversion.errors import ExistingVersionError
 
 
 class ModelVersion(vs.Version):
+    """
+    A class to handle versions of models.
+
+    Parameters
+    ----------
+    version_str : str
+        A string representing the version.
+
+    Attributes
+    ----------
+    version_str : str
+        A string representing the version.
+
+    Methods
+    -------
+    dirname()
+        Returns the directory name of the version.
+
+    Raises
+    ------
+    InvalidVersion
+        If the version string is invalid.
+    """
     def __init__(self, version_str: str):
+        """
+        Initialize the ModelVersion object.
+
+        Parameters
+        ----------
+        version_str : str
+            A string representing the version.
+        """
         self.version_str = version_str
         super().__init__(self.version_str)
 
     @property
     def dirname(self):
+        """
+        Return the directory name of the version.
+
+        Returns
+        -------
+        str
+            The directory name of the version.
+        """
         return f"version={self.version_str}"
 
 
