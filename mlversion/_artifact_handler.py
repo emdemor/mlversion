@@ -281,6 +281,7 @@ class ArtifactHandler:
             self._version_handler.add_new_version("0.0.0")
 
     def increment_version_patch(self):
+        self.commit()
         old_dirname = self.version.dirname
         release = list(self.version.release)
         release[-1] = int(release[-1]) + 1

@@ -48,7 +48,7 @@ env-clear:
 	conda env remove -n mlversion
 
 unit-test:
-	if [ ! -d $(WORKDIR_PATH) ]; then rm -rf $(WORKDIR_PATH); fi
+	if [ -d $(WORKDIR_PATH) ]; then rm -rf $(WORKDIR_PATH) && echo REMOVENDO; fi
 	mkdir -p $(WORKDIR_PATH);
 	mkdir -p $(WORKDIR_MODELS_PATH);
 	mkdir -p $(WORKDIR_DATA_PATH);
